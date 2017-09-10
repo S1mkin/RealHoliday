@@ -159,7 +159,7 @@ dat:string;
     num:=num+1;
     SetLength(rec,num);
     rec[num-1].data:=dat;
-    rec[num-1].text:=UTF8ToUnicodeString(copy(tempStr,7,Length(tempStr)-6));
+    rec[num-1].text:=copy(tempStr,7,Length(tempStr)-6);
     rec[num-1].text:=TextWithAge(rec[num-1].text);
   end;
 
@@ -176,27 +176,22 @@ rec[0].text:='Симкин Андрей - разработчик этой программы 1985 г.';
 
 //если файл с опциями существует, то считываем от туда путь к файлу с днюхами
 if FileExists('option.ini') then begin
-Assignfile(fOption,'option.ini');
-Reset(fOption);
-
-While not EOF(fOption) do begin
-Readln(fOption,fn);
-
-//если такой файл существует, то загружаем из него все что нам нужно
-if fn[1]='#' then  Continue;
-fn:=UTF8ToUnicodeString(fn);
-if FileExists(fn) then LoadFromFile(fn)
-else MessageDlg('Файл '+fn+' не найден! ',mtInformation, [mbOk],0);
-
-//если файла с опциями нет, то смотрим, есть ли файл Holiday.txt
-end; //while
-CloseFile(fOption);
-end //options
-
-else if fileexists('Holiday.txt') then LoadFromFile('Holiday.txt')
-else MessageDlg('Файл Holiday.txt не найден! ',mtInformation, [mbOk],0);
-
-
+  Assignfile(fOption,'option.ini');
+  Reset(fOption);
+    While not EOF(fOption) do begin
+      Readln(fOption,fn);
+      //если такой файл существует, то загружаем из него все что нам нужно
+      if fn[1]='#' then  Continue;
+      //fn:=UTF8ToUnicodeString(fn);
+      if FileExists(fn) then LoadFromFile(fn)
+      else MessageDlg('Файл '+fn+' не найден! ',mtInformation, [mbOk],0);
+      //если файла с опциями нет, то смотрим, есть ли файл Holiday.txt
+    end; //while
+    CloseFile(fOption);
+  end //options
+  else
+    if fileexists('Holiday.txt') then LoadFromFile('Holiday.txt')
+    else MessageDlg('Файл Holiday.txt не найден! ',mtInformation, [mbOk],0);
 end;
 
 procedure Delay(dwMilliseconds: Longint);
@@ -450,7 +445,7 @@ Procedure TFMain.FormCreate(Sender: TObject);
 begin
 //выводим в заголовке Сегодняшнюю дату и день недели
 FMain.Caption:='Сегодня: '+FormatDateTime('dddd ',now)+FormatDateTime('dd ',Date)+monthname(FormatDateTime('mm',now));
-FMain.LLink.Caption:='RealAdmin.ru'+#13#10+'RealHoliday v2.1';
+FMain.LLink.Caption:='RealAdmin.ru'+#13#10+'RealHoliday v2.3';
 FontSize:=16;
 //если ключ в сис. реестре есть, то считываем из него информацию
 Reg := TRegistry.Create;
