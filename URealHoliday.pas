@@ -68,6 +68,8 @@ var
   num:word;
   FontSize:byte;
   Reg:TRegistry;
+  option_showOnlyTodayHolidays:boolean;
+  option_charsetUTF8:boolean;
   implementation
 
 {$R *.dfm}
@@ -134,7 +136,8 @@ dat:string;
 
   procedure LoadFromFile(FileName:string);
   var
-    fHoliday:textfile; //путь к данным сднями рождения
+    fHoliday:textfile; //путь к данным с днями рождения
+    showHoliday:boolean; //условие, выводить день рождение или нет
   begin
   assignfile(fHoliday,FileName);
   reset(fHoliday);
@@ -147,19 +150,28 @@ dat:string;
   dat:=copy(tempStr,1,5);
   //здесь проверка на проф пригодность даты
 
-  if
-  (dat=FormatDateTime('dd.mm',now)) or
-  (dat=FormatDateTime('dd.mm',IncDay(now,1))) or
-  (dat=FormatDateTime('dd.mm',IncDay(now,2))) or
-  (dat=FormatDateTime('dd.mm',IncDay(now,3))) or
-  (dat=FormatDateTime('dd.mm',IncDay(now,4))) or
-  (dat=FormatDateTime('dd.mm',IncDay(now,5))) or
-  (dat=FormatDateTime('dd.mm',IncDay(now,6))) or
-  (dat=FormatDateTime('dd.mm',IncDay(now,7))) then begin
+  showHoliday:=false;
+
+  if dat=FormatDateTime('dd.mm',IncDay(now,7)) then showHoliday:=true;
+  if dat=FormatDateTime('dd.mm',IncDay(now,6)) then showHoliday:=true;
+  if dat=FormatDateTime('dd.mm',IncDay(now,5)) then showHoliday:=true;
+  if dat=FormatDateTime('dd.mm',IncDay(now,4)) then showHoliday:=true;
+  if dat=FormatDateTime('dd.mm',IncDay(now,3)) then showHoliday:=true;
+  if dat=FormatDateTime('dd.mm',IncDay(now,2)) then showHoliday:=true;
+  if dat=FormatDateTime('dd.mm',IncDay(now,1)) then showHoliday:=true;
+  if option_showOnlyTodayHolidays=true then showHoliday:=false;
+  if dat=FormatDateTime('dd.mm',now) then showHoliday:=true;
+
+
+  if showHoliday then begin
     num:=num+1;
     SetLength(rec,num);
     rec[num-1].data:=dat;
-    rec[num-1].text:=copy(tempStr,7,Length(tempStr)-6);
+    if option_charsetUTF8 then begin
+      rec[num-1].text:=UTF8ToUnicodeString(copy(tempStr,7,Length(tempStr)-6));
+    end else begin
+      rec[num-1].text:=copy(tempStr,7,Length(tempStr)-6);
+    end;
     rec[num-1].text:=TextWithAge(rec[num-1].text);
   end;
 
@@ -173,6 +185,8 @@ num:=1;
 SetLength(rec,num);
 rec[0].data:='27.08';
 rec[0].text:='Симкин Андрей - разработчик этой программы 1985 г.';
+option_charsetUTF8 := false;
+option_showOnlyTodayHolidays := false;
 
 //если файл с опциями существует, то считываем от туда путь к файлу с днюхами
 if FileExists('option.ini') then begin
@@ -181,8 +195,11 @@ if FileExists('option.ini') then begin
     While not EOF(fOption) do begin
       Readln(fOption,fn);
       //если такой файл существует, то загружаем из него все что нам нужно
-      if fn[1]='#' then  Continue;
-      //fn:=UTF8ToUnicodeString(fn);
+      if fn='_charset_UTF-8' then begin option_charsetUTF8:=true; Continue; end;
+      if fn='_show_holidays_only_today' then begin option_showOnlyTodayHolidays:=true; Continue; end;
+      if fn[1]='#' then Continue;
+      if fn[1]='_' then Continue;
+      // fn:=UTF8ToUnicodeString(fn);
       if FileExists(fn) then LoadFromFile(fn)
       else MessageDlg('Файл '+fn+' не найден! ',mtInformation, [mbOk],0);
       //если файла с опциями нет, то смотрим, есть ли файл Holiday.txt
@@ -239,181 +256,183 @@ begin
 end;
 
 Procedure OutputHoliday; //вывод дней рождения в рич едит на 7 дней
-var
-a:array [0..7] of boolean; //дни недели + 1
-i:word; //для циклов
-tmpStr:string;
 
-procedure OutRecordText;
+  var
+  a:array [0..7] of boolean; //дни недели + 1
+  i:word; //для циклов
+  tmpStr:string;
+
+  procedure OutRecordText;
+  begin
+    FMain.REmain.SelAttributes.Color:=$002F2922;
+    FMain.REmain.SelAttributes.Style:=[];    //fsunderline
+    FMain.REmain.Lines.Add(rec[i].text);
+    FMain.REmain.SelAttributes.Color:=$00B37800;//$00462300;//
+    FMain.REmain.SelAttributes.Style:=[];
+    FMain.REmain.Lines.Add('***');
+  end;
+
+  procedure DelLastStar;
+  begin
+    if FMain.REmain.Lines[FMain.REmain.Lines.Count-1]='***' then begin
+      FMain.REmain.Lines.Delete(FMain.REmain.Lines.Count-1);
+      FMain.REmain.Lines.Add(' ');
+    end;
+  end;
+
+  function DelZero(DataStr:string):string;
+  begin
+    if DataStr[1]='0' then Result:=Copy(DataStr,2,Length(DataStr)-1)
+    else Result:=DataStr;
+  end;
+
 begin
-FMain.REmain.SelAttributes.Color:=$002F2922;
-FMain.REmain.SelAttributes.Style:=[];    //fsunderline
-FMain.REmain.Lines.Add(rec[i].text);
-FMain.REmain.SelAttributes.Color:=$00B37800;//$00462300;//
-FMain.REmain.SelAttributes.Style:=[];
-FMain.REmain.Lines.Add('***');
-end;
 
-procedure DelLastStar;
-begin
-if FMain.REmain.Lines[FMain.REmain.Lines.Count-1]='***' then begin
-FMain.REmain.Lines.Delete(FMain.REmain.Lines.Count-1);
-FMain.REmain.Lines.Add(' ');
-end;
-end;
+  for i:=0 to 7 do a[i]:=false;
 
-function DelZero(DataStr:string):string;
-begin
-if DataStr[1]='0' then Result:=Copy(DataStr,2,Length(DataStr)-1)
-else Result:=DataStr;
-end;
+  FMain.REMain.SelStart:=0;
+  FMain.REMain.Font.Size:=FontSize;
 
-begin
+  //делаем отступ от верха
+  FMain.REmain.SelAttributes.Size:=4;
+  FMain.REMain.Lines.Add('');
 
-for i:=0 to 7 do a[i]:=false;
+  //СЕГОДНЯ
+  tmpStr:=FormatDateTime('dd.mm',now);
+  for i := 0 to length(rec)-1 do begin
+    if tmpStr=rec[i].data then begin
+      if a[0]=false then begin
+        FMain.REmain.SelAttributes.Color:=clRed;
+        FMain.REmain.SelAttributes.Style:=[fsBold, fsUnderLine];
+        FMain.REmain.Lines.Add('СЕГОДНЯ');
+        FMain.REmain.Lines.Add('');
+        a[0]:=true;
+      end;
+      OutRecordText;
+    end;
+  end;
 
-FMain.REMain.SelStart:=0;
-FMain.REMain.Font.Size:=FontSize;
-
-//делаем отступ от верха
-FMain.REmain.SelAttributes.Size:=4;
-FMain.REMain.Lines.Add('');
-
-//СЕГОДНЯ
-tmpStr:=FormatDateTime('dd.mm',now);
-for i := 0 to length(rec)-1 do begin
-if tmpStr=rec[i].data then begin
-if a[0]=false then begin
-FMain.REmain.SelAttributes.Color:=clRed;
-FMain.REmain.SelAttributes.Style:=[fsBold, fsUnderLine];
-FMain.REmain.Lines.Add('СЕГОДНЯ');
-FMain.REmain.Lines.Add('');
-a[0]:=true;
-end;
-OutRecordText;
-end;
-end;
-
-//ЗАВТРА
-tmpStr:=FormatDateTime('dd.mm',IncDay(now,1));
-for i := 0 to length(rec)-1 do begin
-if tmpStr=rec[i].data then begin
-if a[1]=false then begin
-DelLastStar;
-FMain.REmain.SelAttributes.Color:=$00BF0000;
-FMain.REmain.SelAttributes.Style:=[fsBold, fsUnderLine];
-FMain.REmain.Lines.Add('ЗАВТРА');
-FMain.REmain.Lines.Add('');
-a[1]:=true;
-end;
-OutRecordText;
-end;
-end;
+  //ЗАВТРА
+  tmpStr:=FormatDateTime('dd.mm',IncDay(now,1));
+  for i := 0 to length(rec)-1 do begin
+    if tmpStr=rec[i].data then begin
+      if a[1]=false then begin
+        DelLastStar;
+        FMain.REmain.SelAttributes.Color:=$00BF0000;
+        FMain.REmain.SelAttributes.Style:=[fsBold, fsUnderLine];
+        FMain.REmain.Lines.Add('ЗАВТРА');
+        FMain.REmain.Lines.Add('');
+        a[1]:=true;
+      end;
+      OutRecordText;
+    end;
+  end;
 
 
-//ЧЕРЕЗ 2 ДНЯ
-tmpStr:=FormatDateTime('dd.mm',IncDay(now,2));
-for i := 0 to length(rec)-1 do begin
-if tmpStr=rec[i].data then begin
-if a[2]=false then begin
-DelLastStar;
-FMain.REmain.SelAttributes.Color:=$00462300;
-FMain.REmain.SelAttributes.Style:=[fsBold, fsUnderLine];
-FMain.REmain.Lines.Add(WeekDayName(FormatDateTime('dddd',IncDay(now,2)))+DelZero(FormatDateTime('dd ',IncDay(now,2)))+Monthname(FormatDateTime('mm',IncDay(now,2)))+', через 2 дня');
-FMain.REmain.Lines.Add('');
-a[2]:=true;
-end;
-OutRecordText;
-end;
-end;
+  //ЧЕРЕЗ 2 ДНЯ
+  tmpStr:=FormatDateTime('dd.mm',IncDay(now,2));
+  for i := 0 to length(rec)-1 do begin
+    if tmpStr=rec[i].data then begin
+      if a[2]=false then begin
+        DelLastStar;
+        FMain.REmain.SelAttributes.Color:=$00462300;
+        FMain.REmain.SelAttributes.Style:=[fsBold, fsUnderLine];
+        FMain.REmain.Lines.Add(WeekDayName(FormatDateTime('dddd',IncDay(now,2)))+DelZero(FormatDateTime('dd ',IncDay(now,2)))+Monthname(FormatDateTime('mm',IncDay(now,2)))+', через 2 дня');
+        FMain.REmain.Lines.Add('');
+        a[2]:=true;
+      end;
+      OutRecordText;
+    end;
+  end;
 
-//ЧЕРЕЗ 3 ДНЯ
-tmpStr:=FormatDateTime('dd.mm',IncDay(now,3));
-for i := 0 to length(rec)-1 do begin
-if tmpStr=rec[i].data then begin
-if a[3]=false then begin
-DelLastStar;
-FMain.REmain.SelAttributes.Color:=$00462300;
-FMain.REmain.SelAttributes.Style:=[fsBold, fsUnderLine];
-FMain.REmain.Lines.Add(WeekDayName(FormatDateTime('dddd',IncDay(now,3)))+DelZero(FormatDateTime('dd ',IncDay(now,3)))+Monthname(FormatDateTime('mm',IncDay(now,3)))+', через 3 дня');
-FMain.REmain.Lines.Add('');
-a[3]:=true;
-end;
-OutRecordText;
-end;
-end;
-
-
-//ЧЕРЕЗ 4 ДНЯ
-tmpStr:=FormatDateTime('dd.mm',IncDay(now,4));
-for i := 0 to length(rec)-1 do begin
-if tmpStr=rec[i].data then begin
-if a[4]=false then begin
-DelLastStar;
-FMain.REmain.SelAttributes.Color:=$00462300;
-FMain.REmain.SelAttributes.Style:=[fsBold, fsUnderLine];
-FMain.REmain.Lines.Add(WeekDayName(FormatDateTime('dddd',IncDay(now,4)))+DelZero(FormatDateTime('dd ',IncDay(now,4)))+Monthname(FormatDateTime('mm',IncDay(now,4)))+', через 4 дня');
-FMain.REmain.Lines.Add('');
-a[4]:=true;
-end;
-OutRecordText;
-end;
-end;
+  //ЧЕРЕЗ 3 ДНЯ
+  tmpStr:=FormatDateTime('dd.mm',IncDay(now,3));
+  for i := 0 to length(rec)-1 do begin
+    if tmpStr=rec[i].data then begin
+      if a[3]=false then begin
+        DelLastStar;
+        FMain.REmain.SelAttributes.Color:=$00462300;
+        FMain.REmain.SelAttributes.Style:=[fsBold, fsUnderLine];
+        FMain.REmain.Lines.Add(WeekDayName(FormatDateTime('dddd',IncDay(now,3)))+DelZero(FormatDateTime('dd ',IncDay(now,3)))+Monthname(FormatDateTime('mm',IncDay(now,3)))+', через 3 дня');
+        FMain.REmain.Lines.Add('');
+        a[3]:=true;
+      end;
+      OutRecordText;
+    end;
+  end;
 
 
-//ЧЕРЕЗ 5 ДНЕЙ
-tmpStr:=FormatDateTime('dd.mm',IncDay(now,5));
-for i := 0 to length(rec)-1 do begin
-if tmpStr=rec[i].data then begin
-if a[5]=false then begin
-DelLastStar;
-FMain.REmain.SelAttributes.Color:=$00462300;
-FMain.REmain.SelAttributes.Style:=[fsBold, fsUnderLine];
-FMain.REmain.Lines.Add(WeekDayName(FormatDateTime('dddd',IncDay(now,5)))+DelZero(FormatDateTime('dd ',IncDay(now,5)))+Monthname(FormatDateTime('mm',IncDay(now,5)))+', через 5 дней');
-FMain.REmain.Lines.Add('');
-a[5]:=true;
-end;
-OutRecordText;
-end;
-end;
+  //ЧЕРЕЗ 4 ДНЯ
+  tmpStr:=FormatDateTime('dd.mm',IncDay(now,4));
+  for i := 0 to length(rec)-1 do begin
+    if tmpStr=rec[i].data then begin
+      if a[4]=false then begin
+        DelLastStar;
+        FMain.REmain.SelAttributes.Color:=$00462300;
+        FMain.REmain.SelAttributes.Style:=[fsBold, fsUnderLine];
+        FMain.REmain.Lines.Add(WeekDayName(FormatDateTime('dddd',IncDay(now,4)))+DelZero(FormatDateTime('dd ',IncDay(now,4)))+Monthname(FormatDateTime('mm',IncDay(now,4)))+', через 4 дня');
+        FMain.REmain.Lines.Add('');
+        a[4]:=true;
+      end;
+    OutRecordText;
+    end;
+  end;
 
 
-//ЧЕРЕЗ 6 ДНЕЙ
-tmpStr:=FormatDateTime('dd.mm',IncDay(now,6));
-for i := 0 to length(rec)-1 do begin
-if tmpStr=rec[i].data then begin
-if a[6]=false then begin
-DelLastStar;
-FMain.REmain.SelAttributes.Color:=$00462300;
-FMain.REmain.SelAttributes.Style:=[fsBold, fsUnderLine];
-FMain.REmain.Lines.Add(WeekDayName(FormatDateTime('dddd',IncDay(now,6)))+DelZero(FormatDateTime('dd ',IncDay(now,6)))+Monthname(FormatDateTime('mm',IncDay(now,6)))+', через 6 дней');
-FMain.REmain.Lines.Add('');
-a[6]:=true;
-end;
-OutRecordText;
-end;
-end;
+  //ЧЕРЕЗ 5 ДНЕЙ
+  tmpStr:=FormatDateTime('dd.mm',IncDay(now,5));
+  for i := 0 to length(rec)-1 do begin
+    if tmpStr=rec[i].data then begin
+      if a[5]=false then begin
+        DelLastStar;
+        FMain.REmain.SelAttributes.Color:=$00462300;
+        FMain.REmain.SelAttributes.Style:=[fsBold, fsUnderLine];
+        FMain.REmain.Lines.Add(WeekDayName(FormatDateTime('dddd',IncDay(now,5)))+DelZero(FormatDateTime('dd ',IncDay(now,5)))+Monthname(FormatDateTime('mm',IncDay(now,5)))+', через 5 дней');
+        FMain.REmain.Lines.Add('');
+        a[5]:=true;
+      end;
+      OutRecordText;
+    end;
+  end;
 
-//ЧЕРЕЗ НЕДЕЛЮ
-tmpStr:=FormatDateTime('dd.mm',IncDay(now,7));
-for i := 0 to length(rec)-1 do begin
-if tmpStr=rec[i].data then begin
-if a[7]=false then begin
-DelLastStar;
-FMain.REmain.SelAttributes.Color:=$00462300;
-FMain.REmain.SelAttributes.Style:=[fsBold, fsUnderLine];
-FMain.REmain.Lines.Add(WeekDayName(FormatDateTime('dddd',IncDay(now,7)))+DelZero(FormatDateTime('dd ',IncDay(now,7)))+Monthname(FormatDateTime('mm',IncDay(now,7)))+', через неделю');
-FMain.REmain.Lines.Add('');
-a[7]:=true;
-end;
-OutRecordText;
-end;
-end;
 
-if  FMain.REMain.Lines.Count>1 then FMain.REMain.Lines.Delete(FMain.REMain.Lines.Count-1);
-if  FMain.REMain.Lines.Count=0 then begin
-FMain.REmain.SelAttributes.Color:=$00B37800;
-FMain.REMain.Lines.Add('НЕТ СОБЫТИЙ');
+  //ЧЕРЕЗ 6 ДНЕЙ
+  tmpStr:=FormatDateTime('dd.mm',IncDay(now,6));
+  for i := 0 to length(rec)-1 do begin
+    if tmpStr=rec[i].data then begin
+      if a[6]=false then begin
+        DelLastStar;
+        FMain.REmain.SelAttributes.Color:=$00462300;
+        FMain.REmain.SelAttributes.Style:=[fsBold, fsUnderLine];
+        FMain.REmain.Lines.Add(WeekDayName(FormatDateTime('dddd',IncDay(now,6)))+DelZero(FormatDateTime('dd ',IncDay(now,6)))+Monthname(FormatDateTime('mm',IncDay(now,6)))+', через 6 дней');
+        FMain.REmain.Lines.Add('');
+        a[6]:=true;
+      end;
+    OutRecordText;
+    end;
+  end;
+
+  //ЧЕРЕЗ НЕДЕЛЮ
+  tmpStr:=FormatDateTime('dd.mm',IncDay(now,7));
+
+  for i := 0 to length(rec)-1 do begin
+    if tmpStr=rec[i].data then begin
+      if a[7]=false then begin
+        DelLastStar;
+        FMain.REmain.SelAttributes.Color:=$00462300;
+        FMain.REmain.SelAttributes.Style:=[fsBold, fsUnderLine];
+        FMain.REmain.Lines.Add(WeekDayName(FormatDateTime('dddd',IncDay(now,7)))+DelZero(FormatDateTime('dd ',IncDay(now,7)))+Monthname(FormatDateTime('mm',IncDay(now,7)))+', через неделю');
+        FMain.REmain.Lines.Add('');
+        a[7]:=true;
+      end;
+    OutRecordText;
+    end;
+  end;
+
+  if  FMain.REMain.Lines.Count>1 then FMain.REMain.Lines.Delete(FMain.REMain.Lines.Count-1);
+  if  FMain.REMain.Lines.Count=0 then begin
+  FMain.REmain.SelAttributes.Color:=$00B37800;
+  FMain.REMain.Lines.Add('НЕТ СОБЫТИЙ');
 end;
 
 {FMain.REmain.Lines.Add('');
@@ -426,8 +445,8 @@ end;
 
 procedure TFMain.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
 begin
-//перед выходом сохраняем текущее положение окна и шрифт
-Reg := TRegistry.Create;
+    //перед выходом сохраняем текущее положение окна и шрифт
+    Reg := TRegistry.Create;
     Reg.RootKey := HKEY_CURRENT_USER;
     Reg.OpenKey('\Software\RealHoliday\Options', true);
     Reg.WriteInteger('Left',FMain.Left);
@@ -438,33 +457,33 @@ Reg := TRegistry.Create;
     Reg.CloseKey;
     Reg.Free;
 
-CanClose:=true;
+  CanClose:=true;
 end;
 
 Procedure TFMain.FormCreate(Sender: TObject);
 begin
-//выводим в заголовке Сегодняшнюю дату и день недели
-FMain.Caption:='Сегодня: '+FormatDateTime('dddd ',now)+FormatDateTime('dd ',Date)+monthname(FormatDateTime('mm',now));
-FMain.LLink.Caption:='RealAdmin.ru'+#13#10+'RealHoliday v2.3';
-FontSize:=16;
-//если ключ в сис. реестре есть, то считываем из него информацию
-Reg := TRegistry.Create;
-    Reg.RootKey := HKEY_CURRENT_USER;
-if Reg.KeyExists('\Software\RealHoliday\Options') then begin
-    Reg.OpenKey('\Software\RealHoliday\Options', true);
-    FMain.Left:=Reg.ReadInteger('Left');
-    FMain.Top:=Reg.ReadInteger('Top');
-    FMain.Width:=Reg.ReadInteger('Width');
-    FMain.Height:=Reg.ReadInteger('Height');
-    FontSize:=Reg.ReadInteger('FontSize');
-    Reg.CloseKey;
-    FMain.Position:=poDesigned; //разрешаем изменять форму
-end;
-    Reg.Free;
+  //выводим в заголовке Сегодняшнюю дату и день недели
+  FMain.Caption:='Сегодня: '+FormatDateTime('dddd ',now)+FormatDateTime('dd ',Date)+monthname(FormatDateTime('mm',now));
+  FMain.LLink.Caption:='RealAdmin.ru'+#13#10+'RealHoliday v2.4';
+  FontSize:=16;
+  //если ключ в сис. реестре есть, то считываем из него информацию
+  Reg := TRegistry.Create;
+  Reg.RootKey := HKEY_CURRENT_USER;
+  if Reg.KeyExists('\Software\RealHoliday\Options') then begin
+      Reg.OpenKey('\Software\RealHoliday\Options', true);
+      FMain.Left:=Reg.ReadInteger('Left');
+      FMain.Top:=Reg.ReadInteger('Top');
+      FMain.Width:=Reg.ReadInteger('Width');
+      FMain.Height:=Reg.ReadInteger('Height');
+      FontSize:=Reg.ReadInteger('FontSize');
+      Reg.CloseKey;
+      FMain.Position:=poDesigned; //разрешаем изменять форму
+  end;
+  Reg.Free;
 
-LoadHoliday; //загружаем список дней рождений
-OutputHoliday;  //выводим на экран нужные
-//SetIndents(20);  //делаем отступы в REMain от краев
+  LoadHoliday; //загружаем список дней рождений
+  OutputHoliday;  //выводим на экран нужные
+  //SetIndents(20);  //делаем отступы в REMain от краев
 end;
 
 procedure TFMain.FormMouseLeave(Sender: TObject);
@@ -497,7 +516,7 @@ end;
 
 procedure TFMain.LLinkClick(Sender: TObject);
 begin
-ShellExecute(Handle,'open','http://realadmin.ru',nil,nil,SW_ShowNormal);
+ShellExecute(Handle,'open','https://realadmin.ru',nil,nil,SW_ShowNormal);
 end;
 
 procedure TFMain.LLinkMouseEnter(Sender: TObject);
@@ -507,14 +526,12 @@ end;
 
 procedure TFMain.BBIncClick(Sender: TObject);
 begin
-
-if (REMain.SelAttributes.Size<30) then begin
-REMain.SelStart:=1;
-REMain.SelLength:=length(remain.text)-1;
-FontSize:=FontSize+2;
-REMain.SelAttributes.Size:=FontSize;
-end;
-
+  if (REMain.SelAttributes.Size<30) then begin
+    REMain.SelStart:=1;
+    REMain.SelLength:=length(remain.text)-1;
+    FontSize:=FontSize+2;
+    REMain.SelAttributes.Size:=FontSize;
+  end;
 end;
 
 procedure TFMain.BOkMainClick(Sender: TObject);
@@ -579,12 +596,12 @@ end;
 
 procedure TFMain.REmainEnter(Sender: TObject);
 begin
-FMain.SelectNext(Self,true,true);
+  FMain.SelectNext(Self,true,true);
 end;
 
 procedure TFMain.REmainMouseEnter(Sender: TObject);
 begin
-PBut.Left:=-33;
+  PBut.Left:=-33;
 end;
 
 procedure TFMain.REmainMouseMove(Sender: TObject; Shift: TShiftState; X,

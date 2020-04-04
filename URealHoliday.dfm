@@ -3,7 +3,7 @@ object FMain: TFMain
   Top = 196
   AlphaBlendValue = 200
   BorderIcons = [biSystemMenu]
-  Caption = #1053#1072#1087#1086#1084#1080#1085#1072#1090#1077#1083#1100' '#1087#1088#1072#1079#1076#1085#1080#1082#1086#1074' RealHoliday v2.1'
+  Caption = #1053#1072#1087#1086#1084#1080#1085#1072#1090#1077#1083#1100' '#1087#1088#1072#1079#1076#1085#1080#1082#1086#1074' RealHoliday v2.3'
   ClientHeight = 406
   ClientWidth = 464
   Color = clBtnFace
