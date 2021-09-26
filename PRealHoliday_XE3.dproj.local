@@ -1,11 +1,11 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <BorlandProject>
 	<Transactions>
+    <Transaction>1899.12.30 00:00:00.000.096,D:\Дельфи напоминатель дней рождения\PRealHoliday.dproj=C:\Users\adm\Documents\RAD Studio\Projects\Project1.dproj</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.108,C:\Users\Sasser\Desktop\Delphi Real Holiday New Format and Multi File and Age and WebBroser\PRealHoliday_XE3.dproj=C:\Users\Sasser\Desktop\Delphi Real Holiday New Format and Multi File and Age and WebBroser\PRealHoliday.dproj</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.308,D:\Дельфи напоминатель дней рождения\URealHoliday.pas=C:\Users\adm\Documents\RAD Studio\Projects\Unit1.pas</Transaction>
     <Transaction>1899.12.30 00:00:00.000.650,=C:\Users\adm\Documents\RAD Studio\Projects\Unit1.pas</Transaction>
-    <Transaction>1899.12.30 00:00:00.000.308,C:\Users\adm\Documents\RAD Studio\Projects\Unit1.dfm=D:\Дельфи напоминатель дней рождения\URealHoliday.dfm</Transaction>
-    <Transaction>1899.12.30 00:00:00.000.096,C:\Users\adm\Documents\RAD Studio\Projects\Project1.dproj=D:\Дельфи напоминатель дней рождения\PRealHoliday.dproj</Transaction>
-    <Transaction>1899.12.30 00:00:00.000.108,C:\Users\Sasser\Desktop\Delphi Real Holiday New Format and Multi File and Age and WebBroser\PRealHoliday.dproj=C:\Users\Sasser\Desktop\Delphi Real Holiday New Format and Multi File and Age and WebBroser\PRealHoliday_XE3.dproj</Transaction>
-    <Transaction>1899.12.30 00:00:00.000.308,C:\Users\adm\Documents\RAD Studio\Projects\Unit1.pas=D:\Дельфи напоминатель дней рождения\URealHoliday.pas</Transaction>
     <Transaction>1899.12.30 00:00:00.000.027,=C:\Users\adm\Documents\RAD Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.308,D:\Дельфи напоминатель дней рождения\URealHoliday.dfm=C:\Users\adm\Documents\RAD Studio\Projects\Unit1.dfm</Transaction>
   </Transactions>
 </BorlandProject>

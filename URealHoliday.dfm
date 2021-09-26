@@ -3,8 +3,8 @@ object FMain: TFMain
   Top = 196
   AlphaBlendValue = 200
   BorderIcons = [biSystemMenu]
-  Caption = #1053#1072#1087#1086#1084#1080#1085#1072#1090#1077#1083#1100' '#1087#1088#1072#1079#1076#1085#1080#1082#1086#1074' RealHoliday v2.3'
-  ClientHeight = 406
+  Caption = #1053#1072#1087#1086#1084#1080#1085#1072#1090#1077#1083#1100' '#1087#1088#1072#1079#1076#1085#1080#1082#1086#1074' RealHoliday v2.5'
+  ClientHeight = 442
   ClientWidth = 464
   Color = clBtnFace
   Constraints.MinHeight = 280
@@ -11063,7 +11063,7 @@ object FMain: TFMain
     Left = 0
     Top = 0
     Width = 464
-    Height = 406
+    Height = 442
     ActivePage = TS1
     Align = alClient
     Font.Charset = DEFAULT_CHARSET
@@ -11074,19 +11074,21 @@ object FMain: TFMain
     ParentFont = False
     TabHeight = 25
     TabOrder = 0
+    ExplicitHeight = 409
     object TS1: TTabSheet
-      Caption = '[ '#1055#1088#1072#1079#1076#1085#1080#1082#1080' '#1085#1072' '#1073#1083#1080#1078#1072#1081#1096#1080#1077' 7 '#1076#1085#1077#1081' ]'
+      Caption = #1055#1088#1072#1079#1076#1085#1080#1082#1080' '#1085#1072' '#1073#1083#1080#1078#1072#1081#1096#1080#1077' 7 '#1076#1085#1077#1081
       Font.Charset = DEFAULT_CHARSET
       Font.Color = 12615680
       Font.Height = -11
       Font.Name = 'Tahoma'
       Font.Style = []
       ParentFont = False
+      ExplicitHeight = 371
       object PBottom: TPanel
         Left = 0
-        Top = 336
+        Top = 370
         Width = 456
-        Height = 35
+        Height = 37
         Align = alBottom
         BevelOuter = bvSpace
         Color = 16773589
@@ -11095,12 +11097,12 @@ object FMain: TFMain
         OnMouseEnter = PBottomMouseEnter
         DesignSize = (
           456
-          35)
+          37)
         object IExit: TImage
           Left = 1
           Top = 1
           Width = 185
-          Height = 33
+          Height = 35
           Align = alLeft
           AutoSize = True
           Center = True
@@ -11284,14 +11286,17 @@ object FMain: TFMain
             75F9FE86BDBFFC7C4BFF005F76F5D0D1457157DE3E8FF33D4A7D7E5FA9FFD9}
           OnMouseEnter = IExitMouseEnter
           OnMouseLeave = IExitMouseLeave
+          ExplicitTop = 16
+          ExplicitHeight = 38
         end
         object LLink: TLabel
-          Left = 354
-          Top = 5
+          AlignWithMargins = True
+          Left = 376
+          Top = 4
           Width = 76
-          Height = 13
+          Height = 29
           Cursor = crHandPoint
-          Anchors = [akRight]
+          Align = alRight
           Caption = 'RealAdmin.ru'
           Font.Charset = DEFAULT_CHARSET
           Font.Color = 16762508
@@ -11301,20 +11306,20 @@ object FMain: TFMain
           ParentFont = False
           OnClick = LLinkClick
           OnMouseEnter = LLinkMouseEnter
-          ExplicitLeft = 448
+          ExplicitHeight = 13
         end
         object BOkMain: TBitBtn
           Left = 128
-          Top = 6
+          Top = 5
           Width = 200
-          Height = 22
+          Height = 27
           Cursor = crHandPoint
           Anchors = []
           Caption = #1054#1050
           Font.Charset = RUSSIAN_CHARSET
-          Font.Color = 8404992
-          Font.Height = -13
-          Font.Name = 'Times New Roman'
+          Font.Color = 8935424
+          Font.Height = -15
+          Font.Name = 'Tahoma'
           Font.Style = [fsBold]
           NumGlyphs = 2
           ParentFont = False
@@ -11326,17 +11331,18 @@ object FMain: TFMain
         Left = 0
         Top = 0
         Width = 456
-        Height = 336
+        Height = 370
         Align = alClient
         TabOrder = 1
+        ExplicitHeight = 336
         DesignSize = (
           456
-          336)
+          370)
         object REmain: TRichEdit
           Left = 1
           Top = 1
           Width = 454
-          Height = 334
+          Height = 368
           Cursor = crArrow
           TabStop = False
           Align = alClient
@@ -11359,10 +11365,11 @@ object FMain: TFMain
           OnEnter = REmainEnter
           OnMouseEnter = REmainMouseEnter
           OnMouseMove = REmainMouseMove
+          ExplicitHeight = 334
         end
         object PBut: TPanel
           Left = -33
-          Top = 126
+          Top = 143
           Width = 44
           Height = 82
           Anchors = [akLeft]
@@ -11380,6 +11387,7 @@ object FMain: TFMain
           ParentFont = False
           TabOrder = 1
           OnMouseEnter = PButMouseEnter
+          ExplicitTop = 126
           DesignSize = (
             44
             82)
@@ -11461,7 +11469,7 @@ object FMain: TFMain
     end
   end
   object TrayIcon1: TTrayIcon
-    Hint = 'RealCubes.ru'
+    Hint = 'RealHoliday'
     Icon.Data = {
       0000010005000000000000000000282004005600000080800000000000002808
       01007E2004003030000000000000A8250000A62805002020000000000000A810
@@ -22498,6 +22506,7 @@ object FMain: TFMain
       000000000000000000000000000000000000000000000000000000000000FFFF
       00C0F26FE6C7F00F08A0C007471AC003ED960003E69600010000000004000000
       04000000040080030400C003000080039200C4076F19EF9F6F19FFFF0400}
+    PopupMenu = TrayPopupMenu1
     Visible = True
     OnClick = TrayIcon1Click
     Left = 224
@@ -22508,5 +22517,13 @@ object FMain: TFMain
     OnDeactivate = ApplicationEvents1Deactivate
     Left = 296
     Top = 16
+  end
+  object TrayPopupMenu1: TPopupMenu
+    Left = 360
+    Top = 16
+    object N1: TMenuItem
+      Caption = #1042#1099#1093#1086#1076
+      OnClick = N1Click
+    end
   end
 end

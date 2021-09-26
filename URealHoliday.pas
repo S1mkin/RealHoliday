@@ -7,6 +7,8 @@ uses
   Dialogs, Menus, StdCtrls, ExtCtrls, DateUtils, Grids, Buttons,
   Mask, registry,ShellApi, Vcl.AppEvnts, Vcl.ComCtrls, Vcl.Imaging.jpeg;
 
+const WM_GOTOFOREGROUND = WM_USER + 1;  // отлов событи€ разворачивани€ из тре€
+
 type
   TFMain = class(TForm)
     PC: TPageControl;
@@ -23,6 +25,8 @@ type
     I1: TImage;
     BBInc: TBitBtn;
     BBDec: TBitBtn;
+    TrayPopupMenu1: TPopupMenu;
+    N1: TMenuItem;
     procedure FormResize(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
@@ -44,12 +48,14 @@ type
     procedure LLinkClick(Sender: TObject);
     procedure LLinkMouseEnter(Sender: TObject);
     procedure PBottomMouseEnter(Sender: TObject);
+    procedure N1Click(Sender: TObject);
 
   private
     { Private declarations }
 
   public
     { Public declarations }
+    procedure WMGotoForeground(var Msg:TMessage); message WM_GOTOFOREGROUND;
   end;
 
 
@@ -73,6 +79,16 @@ var
   implementation
 
 {$R *.dfm}
+
+procedure TFMain.WMGotoForeground(var Msg: TMessage);
+ var s:PAnsiChar;
+begin
+ //сворачиваем приложение, а потом разворачиваем его
+ //при этом окно будет выведено на передний план
+ FMain.Visible := true;
+ Application.Minimize;
+ Application.Restore;
+end;
 
 procedure TFMain.SetIndents(size:byte);
 var
@@ -464,7 +480,7 @@ Procedure TFMain.FormCreate(Sender: TObject);
 begin
   //выводим в заголовке —егодн€шнюю дату и день недели
   FMain.Caption:='—егодн€: '+FormatDateTime('dddd ',now)+FormatDateTime('dd ',Date)+monthname(FormatDateTime('mm',now));
-  FMain.LLink.Caption:='RealAdmin.ru'+#13#10+'RealHoliday v2.4';
+  FMain.LLink.Caption:='RealAdmin.ru'+#13#10+'RealHoliday v2.5';
   FontSize:=16;
   //если ключ в сис. реестре есть, то считываем из него информацию
   Reg := TRegistry.Create;
@@ -521,7 +537,12 @@ end;
 
 procedure TFMain.LLinkMouseEnter(Sender: TObject);
 begin
-LLink.Font.Color:=$00FF870F;
+LLink.Font.Color := $00885800;
+end;
+
+procedure TFMain.N1Click(Sender: TObject);
+begin
+Close;
 end;
 
 procedure TFMain.BBIncClick(Sender: TObject);
@@ -536,7 +557,8 @@ end;
 
 procedure TFMain.BOkMainClick(Sender: TObject);
 begin
-close;
+Application.Minimize; // ƒелаем форму невидимой
+FMain.Visible := false;
 end;
 
 procedure TFMain.ApplicationEvents1Activate(Sender: TObject);
